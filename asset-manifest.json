@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/CircuitSketch/static/css/main.a7018765.css",
+    "main.js": "/CircuitSketch/static/js/main.c180d8a0.js",
+    "static/js/453.c7ccb3d7.chunk.js": "/CircuitSketch/static/js/453.c7ccb3d7.chunk.js",
+    "index.html": "/CircuitSketch/index.html",
+    "main.a7018765.css.map": "/CircuitSketch/static/css/main.a7018765.css.map",
+    "main.c180d8a0.js.map": "/CircuitSketch/static/js/main.c180d8a0.js.map",
+    "453.c7ccb3d7.chunk.js.map": "/CircuitSketch/static/js/453.c7ccb3d7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a7018765.css",
+    "static/js/main.c180d8a0.js"
+  ]
+}
