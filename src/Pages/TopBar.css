@@ -1,0 +1,100 @@
+.top-bar {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+}
+
+.title-section {
+    flex: 0.1; /* 20% of the width */
+    text-align: left;
+}
+
+.global-settings {
+    flex: 0.4; /* 40% of the width */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.component-settings {
+    flex: 0.4; /* 40% of the width */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.global-settings button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.global-settings img {
+    width: 25px;
+    height: 25px;
+}
+
+.global-settings button img {
+    width: 90%; /* Adjust the size and margin */
+    height: 90%;
+}
+
+.upload-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-button input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.slider-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px; /* Adjust as needed */
+    height: 5px;
+    background: darkgray;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .15s ease-in-out;
+    margin: 0 5px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #383838;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #383838;
+    cursor: pointer;
+}
