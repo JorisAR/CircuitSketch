@@ -9,6 +9,7 @@ class DrawCall {
     public renderOffset = Vector2.Zero; // the render offset in scene units
     public windowResolution = Vector2.One;
     public alpha = 1.0;
+    public highlight = false;
 
     constructor(p: p5, renderScale: Vector2, renderOffset: Vector2, windowResolution : Vector2) {
         this.p = p;

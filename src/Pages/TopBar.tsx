@@ -10,22 +10,33 @@ import undoIcon from 'assets/icons/undo.png';
 import redoIcon from 'assets/icons/redo.png';
 import exportIcon from 'assets/icons/download.png';
 import toggleIcon from 'assets/icons/grid.png';
-import clearIcon from 'assets/icons/reset.png';
+import resetIcon from 'assets/icons/reset.png';
+import deleteIcon from 'assets/icons/delete.png';
+import clearIcon from 'assets/icons/clear.png';
 import homeIcon from 'assets/icons/home.png';
 import uploadIcon from 'assets/icons/upload.png';
 import zoomInIcon from 'assets/icons/zoom_in.png';
 import zoomOutIcon from 'assets/icons/zoom_out.png';
+import mirrorIcon from 'assets/icons/mirror.png';
+import mirror2Icon from 'assets/icons/mirror2.png';
+import checkIcon from 'assets/icons/check.png';
+import EditModeSelector from "Pages/EditModeSelector";
+import Component from "Components/Component";
 
 const TopBar: React.FC = () => {
     const [canUndo, setCanUndo] = useState(Settings.sceneHistory.canUndo());
     const [canRedo, setCanRedo] = useState(Settings.sceneHistory.canRedo());
     const [renderSize, setRenderSize] = useState(Settings.renderSize);
+    const [component, setComponent] = useState(Settings.selectedComponent);
+    const [tag, setTag] = useState(component?.tag || "");
 
     useEffect(() => {
         const handleSettingsChange = () => {
             setCanUndo(Settings.sceneHistory.canUndo());
             setCanRedo(Settings.sceneHistory.canRedo());
             setRenderSize(Settings.renderSize);
+            setComponent(Settings.selectedComponent);
+            setTag(Settings.selectedComponent?.tag || ""); // Update the tag state
         };
 
         Settings.on('change', handleSettingsChange);
@@ -72,7 +83,7 @@ const TopBar: React.FC = () => {
         Settings.renderGrid = !Settings.renderGrid;
     };
 
-    const handleClear = () => {
+    const handleReset = () => {
         Settings.sceneHistory.addState(new Scene());
     };
 
@@ -80,18 +91,42 @@ const TopBar: React.FC = () => {
         Settings.renderOffset = Settings.scene.getComponentCentroid().negate().add(Settings.aspectRatio.multiply(Settings.renderSize * 0.5));
     };
 
+
+    //individual components
+
+    const handleFlip = () => {
+        if (Settings.selectedComponent) {
+            Settings.selectedComponent.flip();
+        }
+    };
+
+    const handleClear = () => {
+        Settings.selectedComponent = undefined;
+    };
+
+    const handleDelete = () => {
+        if (Settings.selectedComponent) {
+            Settings.scene.removeObject(Settings.selectedComponent);
+        }
+    };
+
+    const handleTagChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTag(event.target.value); // Update the local tag state
+    };
+
+    const handleConfirmTag = () => {
+        Settings.scene.updateComponentTag(component, tag);
+    }
+
+    const handleFlipTag = () => {
+        if (Settings.selectedComponent) {
+            Settings.selectedComponent.flipTag();
+        }
+    };
+
     return (
         <div className="top-bar">
-            <div className="title-section">
-                <h1>Circuit Sketch</h1>
-            </div>
             <div className="global-settings">
-                <button onClick={handleUndo} disabled={!canUndo}>
-                    <img src={undoIcon} alt="Undo" />
-                </button>
-                <button onClick={handleRedo} disabled={!canRedo}>
-                    <img src={redoIcon} alt="Redo" />
-                </button>
                 <button onClick={handleExport}>
                     <img src={exportIcon} alt="Export" />
                 </button>
@@ -103,17 +138,28 @@ const TopBar: React.FC = () => {
                         accept=".json"
                     />
                 </button>
+                <button onClick={handleReset}>
+                    <img src={resetIcon} alt="Clear" />
+                </button>
+
+                <div className="vertical-line"/>
+
+                <button onClick={handleUndo} disabled={!canUndo}>
+                    <img src={undoIcon} alt="Undo" />
+                </button>
+                <button onClick={handleRedo} disabled={!canRedo}>
+                    <img src={redoIcon} alt="Redo" />
+                </button>
+                <div className="vertical-line"/>
+
                 <button onClick={handleToggleBackground}>
                     <img src={toggleIcon} alt="Toggle Background" />
-                </button>
-                <button onClick={handleClear}>
-                    <img src={clearIcon} alt="Clear" />
                 </button>
                 <button onClick={handleBackToHome}>
                     <img src={homeIcon} alt="Home" />
                 </button>
                 <div className="slider-wrapper">
-                    <img src={zoomOutIcon} alt="Zoom Out" />
+                    <img src={zoomInIcon} alt="Zoom In" />
                     <input
                         type="range"
                         min="15"
@@ -124,12 +170,42 @@ const TopBar: React.FC = () => {
                             Settings.renderSize = Number(e.target.value);
                         }}
                     />
-                    <img src={zoomInIcon} alt="Zoom In" />
+                    <img src={zoomOutIcon} alt="Zoom Out" />
                 </div>
+                <div className="vertical-line"/>
+                <EditModeSelector></EditModeSelector>
             </div>
-            <div className="component-settings">
-                {/* Placeholder for future component settings controls */}
-            </div>
+
+            {component &&
+                (<div className="component-settings">
+                    <div className="vertical-line"/>
+                    <button onClick={handleClear}>
+                        <img src={clearIcon} alt="Clear" />
+                    </button>
+                    <button onClick={handleFlip}>
+                        <img src={mirrorIcon} alt="Flip" />
+                    </button>
+                    <div className="vertical-line"/>
+                    <button onClick={handleDelete} style={{backgroundColor: "red"}}>
+                        <img src={deleteIcon} alt="Delete" />
+                    </button>
+                    <div className="vertical-line"/>
+                    <input
+                        type="text"
+                        placeholder="Tag"
+                        value={tag} // Bind to local state
+                        onChange={handleTagChange} // Update local state on change
+                        style={{ width: '100px', height: '30px', marginLeft: '10px' }}
+                    />
+                    <button onClick={handleConfirmTag}>
+                        <img src={checkIcon} alt="Confirm" />
+                    </button>
+                    <button onClick={handleFlipTag}>
+                        <img src={mirror2Icon} alt="FlipTag" />
+                    </button>
+                </div>)
+            }
+
         </div>
     );
 }

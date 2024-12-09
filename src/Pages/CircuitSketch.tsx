@@ -6,11 +6,11 @@ import TopBar from "Pages/TopBar";
 
 const CircuitSketch: React.FC = () => {
     return (
-        <div>
+        <div style={{backgroundColor: '#f0f0f0'}}>
             <div style={{display: 'flex', height: 'calc(10vh)'}}>
                 <TopBar></TopBar>
             </div>
-            <div style={{display: 'flex', height: 'calc(100vh - 10vh)'}}>
+            <div style={{display: 'flex', height: 'calc(89.5vh)'}}>
                 <SceneRendererComponent></SceneRendererComponent>
             </div>
         </div>

@@ -5,12 +5,24 @@ import DrawCall from "Scene/DrawCall";
 import WireSegment from "Components/WireSegment";
 
 class ComponentDrawing {
+
+    static strokeAndFill(drawCall: DrawCall, strokeAlpha=1.0, fillAlpha=1.0) {
+        const p = drawCall.p;
+
+        if(drawCall.highlight) {
+            p.stroke(240, 15, 15, strokeAlpha *255.0 * drawCall.alpha);
+            p.fill(240, 15, 15, fillAlpha * 255.0 * drawCall.alpha);
+        } else {
+            p.stroke(0, strokeAlpha * 255.0 * drawCall.alpha);
+            p.fill(0, fillAlpha * 255.0 * drawCall.alpha);
+        }
+        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+    }
+
     static drawResistor(drawCall : DrawCall, size: Vector2): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0,0,0,0);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 0);
 
         // ------------ BODY --------------
         const componentWidth = 0.6;
@@ -22,9 +34,7 @@ class ComponentDrawing {
     static drawLight(drawCall : DrawCall, size: Vector2): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0,0,0,0);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 0);
 
         // ------------ BODY --------------
         const componentWidth = 0.6;
@@ -41,9 +51,7 @@ class ComponentDrawing {
     static drawDiode(drawCall : DrawCall, size: Vector2): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0, 255.0 * drawCall.alpha);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 1);
 
         // ------------ BODY --------------
         const componentWidth = 0.6;
@@ -59,14 +67,12 @@ class ComponentDrawing {
     static drawBattery(drawCall : DrawCall, size: Vector2): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0, 255.0 * drawCall.alpha);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 1);
 
         // ------------ BODY --------------
-        const componentWidth = 0.3;
-        DrawRect(p, new Vector2(-0.125, 0).multiplyV(size), new Vector2(0.05, 0.6).multiplyV(size));
-        DrawRect(p, new Vector2(0.1, 0).multiplyV(size), new Vector2(0.1, 0.4).multiplyV(size));
+        const componentWidth = 0.2;
+        DrawRect(p, new Vector2(-0.08, 0).multiplyV(size), new Vector2(0.033, 0.6).multiplyV(size));
+        DrawRect(p, new Vector2(0.1, 0).multiplyV(size), new Vector2(0.1, 0.3).multiplyV(size));
         ComponentDrawing.wireThroughComponent(drawCall, size.x, componentWidth);
         p.pop();
     }
@@ -74,9 +80,7 @@ class ComponentDrawing {
     static drawSwitch(drawCall : DrawCall, size: Vector2): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0, 255.0 * drawCall.alpha);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 1);
 
         // ------------ BODY --------------
         const componentWidth = 0.6;
@@ -93,9 +97,7 @@ class ComponentDrawing {
     static wireThroughComponent(drawCall : DrawCall, width : number, componentWidthRatio: number): void {
         const p = drawCall.p;
         p.push();
-        p.stroke(0, 255.0 * drawCall.alpha);
-        p.fill(0, 255.0 * drawCall.alpha);
-        p.strokeWeight(drawCall.renderScale.x * WireSegment.WIDTH);
+        ComponentDrawing.strokeAndFill(drawCall, 1, 1);
         const w = 0.5 * width;
 
         // ------------ BODY --------------

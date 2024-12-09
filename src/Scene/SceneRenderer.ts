@@ -8,7 +8,7 @@ import {CreateUI} from "Scene/SceneUI";
 import DraggingComponent from "Components/Dragging/DraggingComponent";
 import SmartWire from "Components/Dragging/SmartWire";
 import WireSegment from "Components/WireSegment";
-import Settings from "Settings/Settings";
+import Settings, {EditMode} from "Settings/Settings";
 import Connector from "Components/Connector";
 import Component from "Components/Component";
 import UIComponentRect from "UI/UIComponentRect";
@@ -26,9 +26,11 @@ class SceneRenderer {
     private renderScale = Vector2.One; // the scale factor applied to rendering to achieve the right rendering. Essentially the amount of pixels that equal one scene unit.
     public windowResolution = Vector2.One;
     private previousMousePosition: Vector2 | undefined = undefined;
+    private previousClickPosition: Vector2 = Vector2.Zero;
     private previousClickTime: number = Date.now();
 
     // states
+    private isTouching: boolean = false;
     private dragging: boolean = false;
     private draggingComponent: DraggingComponent | undefined = undefined;
     //private draggingConnector : Connector | undefined;
@@ -72,86 +74,70 @@ class SceneRenderer {
                     if(this.draggingWire) {
                         this.draggingWire.draw(drawCall);
                     }
-
-/*                    if(this.draggingConnector) {
-                        SmartWire.DrawLine(drawCall, this.draggingConnector.position, this.draggingConnector.direction, scenePos);
-                    }
-
-                    if(this.draggingWire && this.draggingWire.position.distanceTo(scenePos) > 0.25) {
-                        SmartWire.DrawLine(drawCall, this.draggingWire.position.round(), this.draggingWire.wire.getNormalFrom(scenePos), scenePos);
-                    }*/
                 }
             };
 
-            p.mouseDragged = (event) => {
-                const dxdy = this.handleMouseDrag();
-                if (this.dragging) {
-                    Settings.renderOffset = Settings.renderOffset.add(dxdy.divideV(this.renderScale));
-                }
-                if(this.draggingWire) {
-                    this.draggingWire.tryAddSegment(this.windowPointToScene(this.getMousePosition()));
-                }
+            p.touchMoved = () => {
+                if(!this.isTouching) return;
+                const clickPos = this.getMousePosition();
+                this.handleClickDragged(clickPos);
+            };
+
+            p.touchEnded = () => {
+                if(!this.isTouching) return;
+                this.isTouching = false;
+                const clickPos = this.getMousePosition();
+                this.handleClickReleased(clickPos);
+            };
+
+            p.touchStarted = () => {
+                if(this.isTouching) return;
+                this.isTouching = true;
+                const clickPos = this.getMousePosition();
+                this.handleClickPressed(clickPos);
+            };
+
+            p.mouseDragged = () => {
+                const clickPos = this.getMousePosition();
+                this.handleClickDragged(clickPos);
             };
 
             p.mouseReleased = () => {
-                const mousePos = this.getMousePosition();
-                const scenePos = this.windowPointToScene(mousePos);
-                if (this.draggingComponent) {
-                    if(!this.isInWindowNotUI(mousePos)) {
-                        if(!this.draggingComponent.isNewComponent) {
-                            Settings.scene.removeObject(this.draggingComponent.component);
-                        }
-                    } else {
-                        this.draggingComponent.component.orientation = this.draggingComponent.orientation;
-                        if(this.draggingComponent.isNewComponent) {
-                            this.draggingComponent.component.position = this.draggingComponent.position;
-                            Settings.scene.addComponent(this.draggingComponent.component);
-                        } else {
-                            Settings.scene.moveComponent(this.draggingComponent.component, this.draggingComponent.position);
-                        }
-                    }
-                }
-                if(Date.now() - this.previousClickTime > this.DOUBLE_CLICK_THRESHOLD) {
-                    if(this.draggingWire) {
-                        Settings.scene.addWires(this.draggingWire.wires);
-                    }
-/*                    if(this.draggingConnector) {
-                        Settings.scene.addWires(SmartWire.CommitToSegments(this.draggingConnector.position, this.draggingConnector.direction, scenePos))
-                    }
-
-                    if(this.draggingWire) {
-                        Settings.scene.addWires(SmartWire.CommitToSegments(this.draggingWire.position.round(), this.draggingWire.wire.getNormalFrom(scenePos), scenePos));
-                    }*/
-                }
-                if(this.draggingComponent)
-                    this.draggingComponent.component.dragged = false;
-                this.draggingComponent = undefined;
-                this.dragging = false;
-                this.previousMousePosition = undefined;
-                this.draggingWire = undefined;
+                const clickPos = this.getMousePosition();
+                this.handleClickReleased(clickPos);
             };
 
             p.mousePressed = () => {
                 const clickPos = this.getMousePosition();
-                if(!this.isInWindow(clickPos)) return;
+                this.handleClickPressed(clickPos);
+            };
+        });
+    }
 
+    private handleClickPressed(clickPos: Vector2) {
+        if(!this.isInWindow(clickPos)) return;
+        this.previousClickPosition = clickPos;
+
+        const uiElement = this.uiRoot?.getCollidedElement(clickPos);
+        if (uiElement) {
+            uiElement.onMousePressed(clickPos);
+            if(uiElement instanceof UIComponentRect) {
+                this.draggingComponent = new DraggingComponent((uiElement as UIComponentRect).getComponent(), true); // Start dragging a new component
+            }
+            Settings.selectedComponent = undefined;
+            return;
+        }
+
+        switch (Settings.editMode) {
+            case EditMode.SELECT:
+            default: {
                 const doubleClick = this.updateClickTime();
-
-                const uiElement = this.uiRoot?.getCollidedElement(clickPos);
-                if (uiElement) {
-                    uiElement.onMousePressed(clickPos);
-                    if(uiElement instanceof UIComponentRect) {
-                        this.draggingComponent = new DraggingComponent((uiElement as UIComponentRect).getComponent(), true); // Start dragging a new component
-                    }
-
-                    return;
-                }
                 const scenePos = this.windowPointToScene(clickPos);
                 const sceneCast = Settings.scene.getObjectAtPosition(scenePos);
                 if (sceneCast) {
                     if(sceneCast.connector) {
-                        //this.draggingConnector = sceneCast.connector;
                         this.draggingWire = new DraggingWire();
+                        Settings.selectedComponent = undefined;
                         return;
                     } else {
                         if(doubleClick) {
@@ -159,22 +145,92 @@ class SceneRenderer {
                         }
                         if(sceneCast.component instanceof WireSegment) {
                             this.draggingWire = new DraggingWire();
-/*                            this.draggingWire = {
-                                wire: sceneCast.component,
-                                position: scenePos
-                            };*/
                         } else if (sceneCast.component instanceof Component) {
+                            Settings.selectedComponent = sceneCast.component;
                             this.draggingComponent = new DraggingComponent(sceneCast.component, false); // Start dragging the existing component
                             sceneCast.component.dragged = true;
+                        } else {
+                            Settings.selectedComponent = undefined;
                         }
                         return;
                     }
-
                 }
+                Settings.selectedComponent = undefined;
                 this.dragging = true;
+                return;
+            }
+            case EditMode.DRAW: {
+                this.draggingWire = new DraggingWire();
+                return;
+            }
+            case EditMode.ERASE: {
+                this.dragging = true;
+                return;
+            }
+        }
 
-            };
-        });
+
+
+    };
+
+    private handleClickDragged(clickPos: Vector2) {
+        const dxdy = this.handleMouseDrag(clickPos);
+        switch (Settings.editMode) {
+            case EditMode.SELECT:
+            case EditMode.DRAW: {
+                if (this.dragging) {
+                    Settings.renderOffset = Settings.renderOffset.add(dxdy.divideV(this.renderScale));
+                }
+                if(this.draggingWire) {
+                    this.draggingWire.tryAddSegment(this.windowPointToScene(this.getMousePosition()));
+                }
+                return;
+            }
+            case EditMode.ERASE: {
+                if(this.dragging) {
+                    const scenePos = this.windowPointToScene(clickPos);
+                    const sceneCast = Settings.scene.getObjectAtPosition(scenePos);
+                    if (sceneCast) {
+                        Settings.scene.removeObject(sceneCast.component);
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    private handleClickReleased(clickPos: Vector2) {
+        const scenePos = this.windowPointToScene(clickPos);
+        if (this.draggingComponent) {
+            if(!this.isInWindowNotUI(clickPos)) {
+                if(!this.draggingComponent.isNewComponent) {
+                    Settings.scene.removeObject(this.draggingComponent.component);
+                }
+            } else {
+
+                if(this.draggingComponent.isNewComponent) {
+                    this.draggingComponent.component.orientation = this.draggingComponent.orientation;
+                    this.draggingComponent.component.position = this.draggingComponent.position;
+                    Settings.scene.addComponent(this.draggingComponent.component);
+                } else {
+                    if(this.windowPointToScene(this.previousClickPosition).distanceTo(scenePos) > 0.25) {
+                        this.draggingComponent.component.orientation = this.draggingComponent.orientation;
+                        Settings.scene.moveComponent(this.draggingComponent.component, this.draggingComponent.position);
+                    }
+                }
+            }
+        }
+        if(Date.now() - this.previousClickTime > this.DOUBLE_CLICK_THRESHOLD) {
+            if(this.draggingWire) {
+                Settings.scene.addWires(this.draggingWire.wires);
+            }
+        }
+        if(this.draggingComponent)
+            this.draggingComponent.component.dragged = false;
+        this.draggingComponent = undefined;
+        this.dragging = false;
+        this.previousMousePosition = undefined;
+        this.draggingWire = undefined;
     }
 
     private updateClickTime(): boolean {
@@ -196,17 +252,20 @@ class SceneRenderer {
         return position.divideV(this.renderScale).subtract(Settings.renderOffset);
     }
 
+/*    private getFirstTouchPosition(): Vector2 {
+        return new Vector2(this.p5Instance.touches[0].x, this.p5Instance.mouseY);
+    }*/
+
     private getMousePosition(): Vector2 {
         return new Vector2(this.p5Instance.mouseX, this.p5Instance.mouseY);
     }
 
-    private handleMouseDrag() {
-        const position = this.getMousePosition();
+    private handleMouseDrag(newPosition: Vector2) {
         let dxdy = Vector2.Zero;
         if (this.previousMousePosition) {
-            dxdy = position.subtract(this.previousMousePosition);
+            dxdy = newPosition.subtract(this.previousMousePosition);
         }
-        this.previousMousePosition = position;
+        this.previousMousePosition = newPosition;
         return dxdy;
     }
 

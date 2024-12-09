@@ -52,7 +52,7 @@ const SceneRendererComponent: React.FC<SceneRendererComponentProps> = () => {
         }
     }, []);
 
-    return <div ref={canvasRef} style={{ width: '100%', height: '100%' }} className={"SceneRendererWindow"} />;
+    return <div ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default SceneRendererComponent;

@@ -6,6 +6,7 @@ import WireSegment from "Components/WireSegment";
 import ChangeEmitter from "Settings/ChangeEmitter";
 import { JsonObject, JsonProperty } from "json2typescript";
 import CircuitElement from "Components/CircuitElement";
+import Settings from "Settings/Settings";
 
 
 @JsonObject("Scene")
@@ -45,6 +46,13 @@ class Scene extends ChangeEmitter {
         return true;
     }
 
+    public updateComponentTag(component: Component | undefined, tag: string): void {
+        if(component) {
+            component.tag = tag;
+            this.notifyChange();
+        }
+    }
+
     public removeObject(circuitElement: CircuitElement): void {
         if (circuitElement instanceof WireSegment) {
             const index = this.wires.indexOf(circuitElement, 0);
@@ -57,6 +65,7 @@ class Scene extends ChangeEmitter {
                 this.components.splice(index, 1);
             }
         }
+        Settings.selectedComponent = undefined;
         this.notifyChange();
     }
 
