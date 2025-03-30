@@ -11,7 +11,7 @@ import ComponentType from "Components/ComponentType";
 
 export function CreateUI(canvasRef: HTMLDivElement): UIElement {
         const root = new UIRect(RectControl.CreateAsAnchors(0, 1, 0.9, 1), "#f0f0f0");
-        const grid = new UIGridContainer(RectControl.CreateFullAnchors(), 0.5, 1);
+        const grid = new UIGridContainer(RectControl.CreateFullAnchors(), 0.45, 2);
 
         root.addChild(grid);
         grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawResistor, () => new Component(ComponentType.RESISTOR, Vector2.Zero)));
@@ -19,6 +19,8 @@ export function CreateUI(canvasRef: HTMLDivElement): UIElement {
         grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawBattery, () => new Component(ComponentType.BATTERY, Vector2.Zero)));
         grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawSwitch, () => new Component(ComponentType.SWITCH, Vector2.Zero)));
         grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawDiode, () => new Component(ComponentType.DIODE, Vector2.Zero)));
+        grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawAmpereMeter, () => new Component(ComponentType.AMPERE_METER, Vector2.Zero)));
+        grid.addChild(new UIComponentRect(RectControl.CreateFullAnchors(), ComponentDrawing.drawVoltMeter, () => new Component(ComponentType.VOLT_METER, Vector2.Zero)));
 
 
         return root;

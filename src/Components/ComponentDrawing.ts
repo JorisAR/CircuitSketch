@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { Vector2 } from "Utils/Vector2";
-import {DrawCircle, DrawRect} from "Utils/DrawFunctions";
+import {DrawCircle, DrawRect, DrawText} from "Utils/DrawFunctions";
 import DrawCall from "Scene/DrawCall";
 import WireSegment from "Components/WireSegment";
 
@@ -43,6 +43,34 @@ class ComponentDrawing {
         const v2 = new Vector2(0, 0.49 * componentWidth * size.x).rotate(-Math.PI * 0.25);
         p.line(v1.x, v1.y, -v1.x, -v1.y);
         p.line(v2.x, v2.y, -v2.x, -v2.y);
+
+        ComponentDrawing.wireThroughComponent(drawCall, size.x, componentWidth);
+        p.pop();
+    }
+
+    static drawAmpereMeter(drawCall : DrawCall, size: Vector2): void {
+        const p = drawCall.p;
+        p.push();
+        ComponentDrawing.strokeAndFill(drawCall, 1, 0);
+
+        // ------------ BODY --------------
+        const componentWidth = 0.6;
+        DrawCircle(drawCall.p, Vector2.Zero, componentWidth * size.x);
+        DrawText(drawCall.p, Vector2.Zero.subtract(new Vector2(0, -componentWidth * size.x * 0.025)), componentWidth * size.x * 0.75, "A")
+
+        ComponentDrawing.wireThroughComponent(drawCall, size.x, componentWidth);
+        p.pop();
+    }
+
+    static drawVoltMeter(drawCall : DrawCall, size: Vector2): void {
+        const p = drawCall.p;
+        p.push();
+        ComponentDrawing.strokeAndFill(drawCall, 1, 0);
+
+        // ------------ BODY --------------
+        const componentWidth = 0.6;
+        DrawCircle(drawCall.p, Vector2.Zero, componentWidth * size.x);
+        DrawText(drawCall.p, Vector2.Zero.subtract(new Vector2(0, -componentWidth * size.x * 0.025)), componentWidth * size.x * 0.75, "V")
 
         ComponentDrawing.wireThroughComponent(drawCall, size.x, componentWidth);
         p.pop();

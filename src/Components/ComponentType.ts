@@ -4,4 +4,6 @@ export enum ComponentType {
     SWITCH,
     BATTERY,
     DIODE,
+    AMPERE_METER,
+    VOLT_METER,
 } export default ComponentType;

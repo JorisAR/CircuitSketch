@@ -123,6 +123,12 @@ class Component extends CircuitElement {
             case ComponentType.DIODE:
                 ComponentDrawing.drawDiode(drawCall, size);
                 return;
+            case ComponentType.AMPERE_METER:
+                ComponentDrawing.drawAmpereMeter(drawCall, size);
+                return;
+            case ComponentType.VOLT_METER:
+                ComponentDrawing.drawVoltMeter(drawCall, size);
+                return;
             default:
                 ComponentDrawing.drawResistor(drawCall, size);
                 return;
